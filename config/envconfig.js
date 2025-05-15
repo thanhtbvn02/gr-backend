@@ -22,6 +22,7 @@ const envConfig = {
     sessionSecret: process.env.SESSION_SECRET,
     email: process.env.EMAIL_NAME,
     emailPassword: process.env.EMAIL_APP_PASSWORD,
+    captchaSecretKey: process.env.CAPTCHA_SECRET_KEY,
 }
 
 module.exports = envConfig;

@@ -14,4 +14,25 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-module.exports = authenticateToken;
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET || 'USER_SECRET_KEY', (err, decoded) => {
+      if (!err) {
+        req.user = decoded;
+      }
+      // Call next() after verification attempt, regardless of outcome for optional auth
+      next();
+    });
+  } else {
+    // No token, proceed to next middleware/handler
+    next();
+  }
+};
+
+module.exports = {
+  authenticateToken,
+  optionalAuth
+};

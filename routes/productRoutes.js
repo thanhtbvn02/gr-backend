@@ -1,27 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-
-router.get('/search', productController.searchProducts); 
-
-router.get('/paginate', productController.getPaginated);
-
-router.get('/category/:id', productController.searchProductsByCategory);
-// GET all
+// Public routes
 router.get('/', productController.getAll);
-
-
-// GET by ID
+router.get('/search', productController.search);
+router.get('/category/:id', productController.getByCategory);
+router.get('/paginated', productController.getPaginated);
+router.get('/count', productController.countAll);
+router.get('/count/category/:category_id', productController.countByCategory);
+router.get('/count/price-range', productController.countByPriceRange);
 router.get('/:id', productController.getById);
 
-// CREATE
+// Routes
 router.post('/', productController.create);
-
-// UPDATE
 router.put('/:id', productController.update);
-
-// DELETE
-router.delete('/:id', productController.remove);
+router.delete('/:id', productController.delete);
 
 module.exports = router;

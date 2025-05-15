@@ -1,28 +1,34 @@
-const mysql = require('mysql');
-
+const { Sequelize } = require('sequelize');
 const envConfig = require('../config/envconfig');
 
+const sequelize = new Sequelize(
+  envConfig.dbName,
+  envConfig.dbUser,
+  envConfig.dbPassword,
+  {
+    host: envConfig.dbHost,
+    dialect: 'mysql',
+    charset: 'utf8mb4',
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    logging: false
+  }
+);
 
-const pool = mysql.createPool({
-  host: envConfig.dbHost,
-  user: envConfig.dbUser,
-  password: envConfig.dbPassword,
-  database: envConfig.dbName,
-  charset: 'utf8mb4',
-  connectionLimit: 10,
-  queueLimit: 0,
-  multipleStatements: true
-});
-
-// Test kết nối
-pool.getConnection((err, connection) => {
-  if (err) {
+// Test connection
+sequelize.authenticate()
+  .then(() => {
+    console.log('MySQL Connected via Sequelize...');
+  })
+  .catch(err => {
     console.error('MySQL not Connected...');
     console.error(err);
-  } else {
-    console.log('MySQL Connected...');
-    connection.release(); 
-  }
-});
+  });
 
-module.exports = pool;
+module.exports = sequelize;
+
+

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const { URLSearchParams } = require('url');
 const envConfig = require('../config/envconfig');
+const userService = require('../services/userService');
 
 const router = express.Router();
 
@@ -69,31 +70,32 @@ const getGoogleUser = async (code) => {
 };
 
 const checkGoogleUser = async (data) => {
-  return new Promise((resolve, reject) => {
-    User.findByEmail(data.email, async (err, results) => {
-      if (err) return reject(err);
+  try {
+    const user = await userService.findByEmail(data.email);
+    
+    if (user) {
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'USER_SECRET_KEY', { expiresIn: '1d' });
+      return { token, isNew: false };
+    } else {
+      const newUser = await userService.create({
+        username: data.email.split('@')[0], // Tạo username từ email
+        email: data.email,
+        password: null, // Người dùng Google không cần password
+        full_name: data.name,
+        birth_date: null,
+        phone: null,
+        address: null,
+        role: 'user'
+      });
       
-      if (results.length > 0) {
-        const user = results[0];
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'USER_SECRET_KEY', { expiresIn: '1d' });
-        resolve({ token, isNew: false });
-      } else {
-        User.create(data.username || null,
-          data.email,
-          data.hashedPassword || null,
-          data.name,
-          data.birth_date || null,
-          data.phone || null,
-          data.address || null, async (err2, result) => {
-          if (err2) return reject(err2);
-          const user = { id: result.insertId, email: data.email, full_name: data.name };
-          const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'USER_SECRET_KEY', { expiresIn: '1d' });
-          resolve({ token, isNew: true });
-        });
-      }
-    });
-  });
+      const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET || 'USER_SECRET_KEY', { expiresIn: '1d' });
+      return { token, isNew: true };
+    }
+  } catch (error) {
+    throw error;
+  }
 };
+
 
 // Route mở popup Google
 router.get('/google', (req, res) => {
@@ -105,29 +107,32 @@ router.get('/google', (req, res) => {
 router.get('/google/callback', async (req, res) => {
   try {
     const { code, error, error_description } = req.query;
-
+    
     if (error) {
       console.error('Google returned error:', error, error_description);
       return res.redirect(`${process.env.FRONTEND_URL}/login-failed?message=${encodeURIComponent(error_description || 'Google từ chối xác thực')}`);
     }
-
+    
     if (!code) {
       return res.redirect(`${process.env.FRONTEND_URL}/login-failed?message=Mã code không tồn tại từ Google`);
     }
-
+    
     const userData = await getGoogleUser(code);
+    
     if (!userData || !userData.email) {
       console.error('Không lấy được dữ liệu người dùng từ Google:', userData);
       return res.redirect(`${process.env.FRONTEND_URL}/login-failed?message=Không lấy được thông tin người dùng`);
     }
-
+    
     const { token, isNew } = await checkGoogleUser(userData);
-    res.redirect(`${process.env.FRONTEND_URL}/login-success?token=${token}&isNew=${isNew}`);
+    
+    return res.redirect(`${process.env.FRONTEND_URL}/login-success?token=${token}&isNew=${isNew}`);
   } catch (error) {
     console.error('Google OAuth callback error:', error);
-    res.redirect(`${process.env.FRONTEND_URL}/login-failed?message=${encodeURIComponent(error.message || 'Xác thực thất bại')}`);
+    return res.redirect(`${process.env.FRONTEND_URL}/login-failed?message=${encodeURIComponent(error.message || 'Xác thực thất bại')}`);
   }
 });
+
 
 
 module.exports = router;
