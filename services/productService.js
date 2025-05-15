@@ -5,16 +5,26 @@ const { Op } = require('sequelize');
 const sequelize = require('../config/db');
 
 const productService = {
-  findAll: async () => {
-    return await Product.findAll({
-        include: [
-            {
-                model: Category,
-                as: 'Category',
-                attributes: ['name']
-            }
-        ]
-    })
+  findAll: async (includeFirstImage = false) => {
+    const options = {
+      include: [{
+        model: Category,
+        as: 'Category',
+        attributes: ['name']
+      }]
+    };
+    
+    if (includeFirstImage) {
+      options.include.push({
+        model: Image,
+        as: 'Images',
+        attributes: ['id', 'url'],
+        limit: 1,
+        separate: true
+      });
+    }
+    
+    return await Product.findAll(options);
   },
   findById: async (id) => {
     return await Product.findByPk(id, {
@@ -71,12 +81,42 @@ const productService = {
     });
   },
 
-  getPaginated: async (offset = 0, limit = 10) => {
-      return await Product.findAll({
-          order: [['id', 'ASC']],
-          limit,
-          offset
-      });
+  getPaginated: async (offset = 0, limit = 10, includeFirstImage = false) => {
+    const options = {
+      order: [['id', 'ASC']],
+      limit,
+      offset
+    };
+    
+    if (includeFirstImage) {
+      options.include = [{
+        model: Image,
+        as: 'Images',
+        attributes: ['id', 'url'],
+        limit: 1,
+        separate: true
+      }];
+    }
+    
+    return await Product.findAll(options);
+  },
+
+  getFirstImagesForProducts: async (productIds) => {
+    // Sử dụng SQL tương thích với MySQL/MariaDB để lấy hình ảnh đầu tiên cho mỗi sản phẩm
+    const [results] = await sequelize.query(`
+      SELECT i.*
+      FROM images i
+      INNER JOIN (
+        SELECT product_id, MIN(id) as min_id
+        FROM images
+        WHERE product_id IN (${productIds.join(',')})
+        GROUP BY product_id
+      ) first_images
+      ON i.product_id = first_images.product_id AND i.id = first_images.min_id
+      ORDER BY i.product_id
+    `);
+    
+    return results;
   },
 
   create: async (productData) => {

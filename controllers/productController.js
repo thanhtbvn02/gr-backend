@@ -136,58 +136,81 @@ const productController = {
   },
 
   getPaginated: async (req, res) => {
-    const { page, limit = 10, offset } = req.query;
+    const { page, limit = 10, offset, include_image = true } = req.query;
     try {
       let queryOptions = {
         limit: parseInt(limit)
       };
-
+      
       if (offset !== undefined) {
         queryOptions.offset = parseInt(offset);
       } else if (page !== undefined) {
         queryOptions.offset = (parseInt(page) - 1) * parseInt(limit);
       }
-
+      
+      // Sử dụng includeFirstImage từ query param
+      const includeFirstImage = include_image === 'true' || include_image === true;
+      
       const products = await Product.findAndCountAll(queryOptions);
       
       if (products.rows.length === 0) {
         return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
       }
-
+      
+      let productsWithImages = products.rows;
+      
+      if (includeFirstImage) {
+        // Lấy tất cả product_id
+        const productIds = productsWithImages.map(product => product.id);
+        
+        // Lấy hình ảnh đầu tiên cho mỗi sản phẩm trong một lần gọi
+        const images = await productService.getFirstImagesForProducts(productIds);
+        
+        // Map hình ảnh vào sản phẩm
+        productsWithImages = productsWithImages.map(product => {
+          const productImage = images.find(img => img.product_id === product.id);
+          return {
+            ...product.toJSON(),
+            image: productImage ? productImage.url : null
+          };
+        });
+      }
+      
       const response = {
         total: products.count,
-        products: products.rows
+        products: productsWithImages
       };
-
+      
       if (page !== undefined) {
         response.pages = Math.ceil(products.count / parseInt(limit));
         response.currentPage = parseInt(page);
       }
-
+      
       res.json(response);
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      console.error('Error getting paginated products:', err);
+      res.status(500).json({ message: 'Lỗi server', error: err.message });
     }
   },
 
   countAll: async (req, res) => {
     try {
-      const count = await Product.count();
+      const count = await productService.count();
       res.json({ count });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      console.error('Error counting all products:', err);
+      res.status(500).json({ message: 'Lỗi server', error: err.message });
     }
   },
 
   countByCategory: async (req, res) => {
     const { category_id } = req.params;
     try {
-      const count = await Product.count({
-        where: { category_id }
-      });
+      const count = await productService.countByCategory(category_id);
       res.json({ count });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      console.error('Error counting products by category:', err);
+      res.status(500).json({ message: 'Lỗi server', error: err.message });
     }
   },
 
