@@ -26,7 +26,7 @@ const googleRouter = require('./auth/google');
 const authRoutes = require('./routes/authRoutes');
 const captchaRouter = require('./routes/captcha');
 const cartRoutes = require('./routes/cartRoutes');
-
+const addressRouter = require('./routes/addressRouter');
 sequelize.sync({ alter: false })
   .then(() => {
     console.log('Database synchronized');
@@ -47,6 +47,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', googleRouter);
 app.use('/api/captcha', captchaRouter);
 app.use('/api/cart', cartRoutes);
+app.use('/api/addresses', addressRouter);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

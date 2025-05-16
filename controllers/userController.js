@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 
 const userController = {
   register: async (req, res) => {
-    const { username, email, password, full_name, birth_date, phone, address } = req.body;
+    const { username, email, password, full_name, birth_date, phone } = req.body;
     if (!username || !password) {
       return res.status(400).json({ message: 'Thiếu thông tin đăng ký' });
     }
@@ -21,7 +21,6 @@ const userController = {
         full_name,
         birth_date,
         phone,
-        address
       });
       return res.status(201).json({ message: 'Đăng ký thành công' });
     } catch (err) {
@@ -95,7 +94,7 @@ const userController = {
 
   updateById: async (req, res) => {
     const { id } = req.params;
-    const { username, email, full_name, phone, address, birth_date } = req.body;
+    const { username, email, full_name, phone, birth_date } = req.body;
 
     if (!username) {
       return res.status(400).json({ message: 'Username là bắt buộc' });
@@ -103,7 +102,7 @@ const userController = {
 
     try {
       const [updated] = await User.update(
-        { username, email, full_name, phone, address, birth_date },
+        { username, email, full_name, phone, birth_date },
         { where: { id } }
       );
 
