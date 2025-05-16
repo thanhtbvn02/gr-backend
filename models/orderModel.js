@@ -1,28 +1,42 @@
-const db = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
-const Order = {
-  create: (userId, totalAmount, status, paymentMethod, shippingAddress, message, callback) => {
-    const sql = `
-      INSERT INTO Orders (user_id, total_amount, status, payment_method, shipping_address, message)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-    db.query(sql, [userId, totalAmount, status, paymentMethod, shippingAddress, message], callback);
+const Order = sequelize.define('Order', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-
-  getById: (id, callback) => {
-    const sql = 'SELECT * FROM Orders WHERE id = ?';
-    db.query(sql, [id], callback);
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-
-  getByUserId: (userId, callback) => {
-    const sql = 'SELECT * FROM Orders WHERE user_id = ?';
-    db.query(sql, [userId], callback);
+  address_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
-
-  updateStatus: (orderId, status, callback) => {
-    const sql = 'UPDATE Orders SET status = ? WHERE id = ?';
-    db.query(sql, [status, orderId], callback);
+  total_amount: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  payment_method: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  message: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+},{
+    tableName: 'orders',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   }
-};
+);
 
 module.exports = Order;

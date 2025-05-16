@@ -1,18 +1,34 @@
-const db = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
-const OrderItem = {
-  create: (orderId, productId, quantity, unitPrice, callback) => {
-    const sql = `
-      INSERT INTO Order_items (order_id, product_id, quantity, unit_price)
-      VALUES (?, ?, ?, ?)
-    `;
-    db.query(sql, [orderId, productId, quantity, unitPrice], callback);
+const OrderItem = sequelize.define('OrderItem', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-
-  getByOrderId: (orderId, callback) => {
-    const sql = 'SELECT * FROM Order_items WHERE order_id = ?';
-    db.query(sql, [orderId], callback);
+  order_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  product_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  unit_price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+},{
+    tableName: 'order_items',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
   }
-};
+);
 
 module.exports = OrderItem;

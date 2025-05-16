@@ -27,6 +27,7 @@ const authRoutes = require('./routes/authRoutes');
 const captchaRouter = require('./routes/captcha');
 const cartRoutes = require('./routes/cartRoutes');
 const addressRouter = require('./routes/addressRouter');
+const orderItemRoutes = require('./routes/orderItemRoutes');
 sequelize.sync({ alter: false })
   .then(() => {
     console.log('Database synchronized');
@@ -39,6 +40,7 @@ sequelize.sync({ alter: false })
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/order-items', orderItemRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/category', categoryRouter);
 app.use('/api/details', detailRouter);

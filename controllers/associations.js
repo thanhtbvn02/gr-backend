@@ -6,6 +6,9 @@ const Ingredient = require('../models/ingredientModel');
 
 const User = require('../models/userModel');
 const Addresses = require('../models/addressesModel');
+const Order = require('../models/orderModel');
+const OrderItem = require('../models/orderItemModel');
+const Cart = require('../models/cartModel');
 
 // Thiết lập mối quan hệ
 Product.belongsTo(Category, { foreignKey: 'category_id', as: 'Category' });
@@ -23,6 +26,24 @@ Ingredient.belongsTo(Product, { foreignKey: 'product_id' });
 User.hasMany(Addresses, { foreignKey: 'user_id' });
 Addresses.belongsTo(User, { foreignKey: 'user_id' });
 
+User.hasMany(Order, { foreignKey: 'user_id' });
+Order.belongsTo(User, { foreignKey: 'user_id' });
+
+Addresses.hasMany(Order, { foreignKey: 'address_id' });
+Order.belongsTo(Addresses, { foreignKey: 'address_id' });
+
+Order.hasMany(OrderItem, { foreignKey: 'order_id' });
+OrderItem.belongsTo(Order, { foreignKey: 'order_id' });
+
+Product.hasMany(OrderItem, { foreignKey: 'product_id' });
+OrderItem.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
+
+User.hasMany(Cart, { foreignKey: 'user_id' });
+Cart.belongsTo(User, { foreignKey: 'user_id' });
+
+Product.hasMany(Cart, { foreignKey: 'product_id' });
+Cart.belongsTo(Product, { foreignKey: 'product_id' });
+
 module.exports = {
   Product,
   Category,
@@ -30,6 +51,9 @@ module.exports = {
   Detail,
   Ingredient,
   User,
-  Addresses
+  Addresses,
+  Order,
+  OrderItem,
+  Cart
 };
 
