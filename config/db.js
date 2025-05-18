@@ -7,7 +7,9 @@ const sequelize = new Sequelize(
   envConfig.dbPassword,
   {
     host: envConfig.dbHost,
+    port: envConfig.dbPort,
     dialect: 'mysql',
+
     charset: 'utf8mb4',
     pool: {
       max: 10,
