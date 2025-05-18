@@ -3,12 +3,12 @@ const cors = require('cors');
 const sessionMiddleware = require('./middlewares/sessionMiddleware');
 const sequelize = require('./config/db');
 require('./controllers/associations');
-
+const envConfig = require('./config/envconfig');
 const app = express();
 const PORT = 5000;
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: envConfig.frontendUrl,
   credentials: true
 }));
 

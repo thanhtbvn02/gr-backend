@@ -24,6 +24,7 @@ const envConfig = {
     email: process.env.EMAIL_NAME,
     emailPassword: process.env.EMAIL_APP_PASSWORD,
     captchaSecretKey: process.env.CAPTCHA_SECRET_KEY,
+    frontendUrl: process.env.FRONTEND_URL,
 }
 
 module.exports = envConfig;
