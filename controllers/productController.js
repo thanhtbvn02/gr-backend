@@ -1,8 +1,8 @@
 // Op (Operators) là một đối tượng từ Sequelize cung cấp các toán tử để thực hiện các truy vấn phức tạp
 // Ví dụ: Op.like để tìm kiếm theo mẫu, Op.gt để so sánh lớn hơn, Op.lt để so sánh nhỏ hơn,...
-const { Op } = require('sequelize');
-const Product = require('../models/productModel');
-const productService = require('../services/productService');
+const { Op } = require("sequelize");
+const Product = require("../models/productModel");
+const productService = require("../services/productService");
 
 const productController = {
   getAll: async (req, res) => {
@@ -10,7 +10,7 @@ const productController = {
       const products = await Product.findAll();
       res.json(products);
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      res.status(500).json({ message: "Lỗi server", error: err });
     }
   },
 
@@ -19,11 +19,11 @@ const productController = {
     try {
       const product = await Product.findByPk(id);
       if (!product) {
-        return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
       }
       res.json(product);
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      res.status(500).json({ message: "Lỗi server", error: err });
     }
   },
 
@@ -33,26 +33,26 @@ const productController = {
         name: req.body.name,
         unit: req.body.unit,
         price: req.body.price,
-        description: req.body.description || '',
-        uses: req.body.uses || '',
-        how_use: req.body.how_use || '',
-        side_effects: req.body.side_effects || '',
-        notes: req.body.notes || '',
-        preserve: req.body.preserve || '',
+        description: req.body.description || "",
+        uses: req.body.uses || "",
+        how_use: req.body.how_use || "",
+        side_effects: req.body.side_effects || "",
+        notes: req.body.notes || "",
+        preserve: req.body.preserve || "",
         stock: req.body.stock || 0,
-        category_id: req.body.category_id
+        category_id: req.body.category_id,
       };
 
       const newProduct = await Product.create(productData);
-      res.status(201).json({ 
-        message: 'Tạo sản phẩm thành công', 
-        product: newProduct 
+      res.status(201).json({
+        message: "Tạo sản phẩm thành công",
+        product: newProduct,
       });
     } catch (err) {
-      console.error('Error creating product:', err);
-      res.status(500).json({ 
-        message: 'Lỗi server khi tạo sản phẩm', 
-        error: err.message 
+      console.error("Error creating product:", err);
+      res.status(500).json({
+        message: "Lỗi server khi tạo sản phẩm",
+        error: err.message,
       });
     }
   },
@@ -65,12 +65,12 @@ const productController = {
       });
 
       if (!updated) {
-        return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
       }
 
-      res.json({ message: 'Cập nhật thành công' });
+      res.json({ message: "Cập nhật thành công" });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server khi cập nhật', error: err });
+      res.status(500).json({ message: "Lỗi server khi cập nhật", error: err });
     }
   },
 
@@ -82,12 +82,12 @@ const productController = {
       });
 
       if (!deleted) {
-        return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
       }
 
-      res.json({ message: 'Xóa thành công' });
+      res.json({ message: "Xóa thành công" });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server khi xóa', error: err });
+      res.status(500).json({ message: "Lỗi server khi xóa", error: err });
     }
   },
 
@@ -97,24 +97,24 @@ const productController = {
       const products = await productService.searchByCategory(id);
       res.json(products);
     } catch (err) {
-      console.error('Error getting products by category:', err);
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      console.error("Error getting products by category:", err);
+      res.status(500).json({ message: "Lỗi server", error: err });
     }
   },
 
   search: async (req, res) => {
-    const { keyword } = req.query;
+    const { query } = req.query;
     try {
       const products = await Product.findAll({
         where: {
           name: {
-            [Op.like]: `%${keyword}%`,
+            [Op.like]: `%${query}%`,
           },
         },
       });
       res.json(products);
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      res.status(500).json({ message: "Lỗi server", error: err });
     }
   },
 
@@ -123,15 +123,20 @@ const productController = {
     const { quantity } = req.body;
 
     try {
-      const [updated] = await Product.update({ stock: quantity }, { where: { id } });
+      const [updated] = await Product.update(
+        { stock: quantity },
+        { where: { id } }
+      );
 
       if (!updated) {
-        return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
       }
 
-      res.json({ message: 'Cập nhật tồn kho thành công' });
+      res.json({ message: "Cập nhật tồn kho thành công" });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server khi cập nhật tồn kho', error: err });
+      res
+        .status(500)
+        .json({ message: "Lỗi server khi cập nhật tồn kho", error: err });
     }
   },
 
@@ -139,57 +144,62 @@ const productController = {
     const { page, limit = 10, offset, include_image = true } = req.query;
     try {
       let queryOptions = {
-        limit: parseInt(limit)
+        limit: parseInt(limit),
       };
-      
+
       if (offset !== undefined) {
         queryOptions.offset = parseInt(offset);
       } else if (page !== undefined) {
         queryOptions.offset = (parseInt(page) - 1) * parseInt(limit);
       }
-      
+
       // Sử dụng includeFirstImage từ query param
-      const includeFirstImage = include_image === 'true' || include_image === true;
-      
+      const includeFirstImage =
+        include_image === "true" || include_image === true;
+
       const products = await Product.findAndCountAll(queryOptions);
-      
+
       if (products.rows.length === 0) {
-        return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
       }
-      
+
       let productsWithImages = products.rows;
-      
+
       if (includeFirstImage) {
         // Lấy tất cả product_id
-        const productIds = productsWithImages.map(product => product.id);
-        
+        const productIds = productsWithImages.map((product) => product.id);
+
         // Lấy hình ảnh đầu tiên cho mỗi sản phẩm trong một lần gọi
-        const images = await productService.getFirstImagesForProducts(productIds);
-        
+        const images = await productService.getFirstImagesForProducts(
+          productIds
+        );
+
         // Map hình ảnh vào sản phẩm
-        productsWithImages = productsWithImages.map(product => {
-          const productImage = images.find(img => img.product_id === product.id);
+        productsWithImages = productsWithImages.map((product) => {
+          const productImage = images.find(
+            (img) => img.product_id === product.id
+          );
           return {
             ...product.toJSON(),
-            image: productImage ? productImage.url : null
+            image: productImage ? productImage.url : null,
           };
         });
       }
-      
+
       const response = {
         total: products.count,
-        products: productsWithImages
+        products: productsWithImages,
       };
-      
+
       if (page !== undefined) {
         response.pages = Math.ceil(products.count / parseInt(limit));
         response.currentPage = parseInt(page);
       }
-      
+
       res.json(response);
     } catch (err) {
-      console.error('Error getting paginated products:', err);
-      res.status(500).json({ message: 'Lỗi server', error: err.message });
+      console.error("Error getting paginated products:", err);
+      res.status(500).json({ message: "Lỗi server", error: err.message });
     }
   },
 
@@ -198,8 +208,8 @@ const productController = {
       const count = await productService.count();
       res.json({ count });
     } catch (err) {
-      console.error('Error counting all products:', err);
-      res.status(500).json({ message: 'Lỗi server', error: err.message });
+      console.error("Error counting all products:", err);
+      res.status(500).json({ message: "Lỗi server", error: err.message });
     }
   },
 
@@ -209,8 +219,8 @@ const productController = {
       const count = await productService.countByCategory(category_id);
       res.json({ count });
     } catch (err) {
-      console.error('Error counting products by category:', err);
-      res.status(500).json({ message: 'Lỗi server', error: err.message });
+      console.error("Error counting products by category:", err);
+      res.status(500).json({ message: "Lỗi server", error: err.message });
     }
   },
 
@@ -220,15 +230,15 @@ const productController = {
       const count = await Product.count({
         where: {
           price: {
-            [Op.between]: [parseFloat(min), parseFloat(max)]
-          }
-        }
+            [Op.between]: [parseFloat(min), parseFloat(max)],
+          },
+        },
       });
       res.json({ count });
     } catch (err) {
-      res.status(500).json({ message: 'Lỗi server', error: err });
+      res.status(500).json({ message: "Lỗi server", error: err });
     }
-  }
+  },
 };
 
 module.exports = productController;

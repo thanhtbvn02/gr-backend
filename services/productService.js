@@ -1,103 +1,109 @@
-const Product = require('../models/productModel');
-const Category = require('../models/categoryModel');
-const CategoryService = require('./categoryService');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
+const Product = require("../models/productModel");
+const Category = require("../models/categoryModel");
+const CategoryService = require("./categoryService");
+const { Op } = require("sequelize");
+const sequelize = require("../config/db");
 
 const productService = {
   findAll: async (includeFirstImage = false) => {
     const options = {
-      include: [{
-        model: Category,
-        as: 'Category',
-        attributes: ['name']
-      }]
+      include: [
+        {
+          model: Category,
+          as: "Category",
+          attributes: ["name"],
+        },
+      ],
     };
-    
+
     if (includeFirstImage) {
       options.include.push({
         model: Image,
-        as: 'Images',
-        attributes: ['id', 'url'],
+        as: "Images",
+        attributes: ["id", "url"],
         limit: 1,
-        separate: true
+        separate: true,
       });
     }
-    
+
     return await Product.findAll(options);
   },
   findById: async (id) => {
     return await Product.findByPk(id, {
-        include: [
-            {
-                model: Category,
-                as: 'Category',
-                attributes: ['name']
-            }
-        ]
+      include: [
+        {
+          model: Category,
+          as: "Category",
+          attributes: ["name"],
+        },
+      ],
     });
   },
 
   searchByName: async (name) => {
     return await Product.findAll({
-        where: { 
-            name: {
-                [Op.like]: `%${name}%` } },
-        include: [
-            { 
-                model: Category, 
-                as: 'Category', 
-                attributes: ['name'] 
-            }
-        ]
+      where: {
+        name: {
+          [Op.like]: `%${name}%`,
+        },
+      },
+      include: [
+        {
+          model: Category,
+          as: "Category",
+          attributes: ["name"],
+        },
+      ],
     });
   },
 
-  searchByCategory: async (categoryId) =>{
+  searchByCategory: async (categoryId) => {
     const findAllCategories = async (categoryId) => {
-        const subCategories = [categoryId];
+      const subCategories = [categoryId];
 
-    const findChildren = async (categoryId) => {   
+      const findChildren = async (categoryId) => {
         const children = await Category.findAll({
-            where: { parent_id: categoryId }
+          where: { parent_id: categoryId },
         });
         for (const child of children) {
-            subCategories.push(child.id);
-            await findChildren(child.id);
+          subCategories.push(child.id);
+          await findChildren(child.id);
         }
-    };
-    await findChildren(categoryId);
-    return subCategories;     
+      };
+      await findChildren(categoryId);
+      return subCategories;
     };
     const categoryIds = await findAllCategories(categoryId);
     return await Product.findAll({
-        where: { 
-            category_id: { 
-            [Op.in]: categoryIds 
-        } 
-    },
-        order: [['id', 'ASC']],
-        limit: 100
+      where: {
+        category_id: {
+          [Op.in]: categoryIds,
+        },
+      },
+      order: [["id", "ASC"]],
+      limit: 100,
     });
   },
 
   getPaginated: async (offset = 0, limit = 10, includeFirstImage = false) => {
     const options = {
-      order: [['id', 'ASC']],
+      order: [["id", "ASC"]],
       limit,
-      offset
+      offset,
     };
-    
+
     if (includeFirstImage) {
-      options.include = [{
-        model: Image,
-        as: 'Images',
-        attributes: ['id', 'url'],
-        limit: 1,
-        separate: true
-      }];
+      options.include = [
+        {
+          model: Image,
+          as: "Images",
+          attributes: ["id", "url"],
+          limit: 1,
+          separate: true,
+        },
+      ];
     }
-    
+
     return await Product.findAll(options);
   },
 
@@ -109,47 +115,49 @@ const productService = {
       INNER JOIN (
         SELECT product_id, MIN(id) as min_id
         FROM images
-        WHERE product_id IN (${productIds.join(',')})
+        WHERE product_id IN (${productIds.join(",")})
         GROUP BY product_id
       ) first_images
       ON i.product_id = first_images.product_id AND i.id = first_images.min_id
       ORDER BY i.product_id
     `);
-    
+
     return results;
   },
 
   create: async (productData) => {
-      return await Product.create(productData);
+    return await Product.create(productData);
   },
 
   update: async (id, productData) => {
-      return await Product.update(productData, { 
-          where: { id } 
-      });
-  },      
+    return await Product.update(productData, {
+      where: { id },
+    });
+  },
 
   remove: async (id) => {
-      return await Product.destroy({ 
-          where: { id } 
-      });
+    return await Product.destroy({
+      where: { id },
+    });
   },
 
   count: async () => {
-      return await Product.count();
+    return await Product.count();
   },
 
   countByCategory: async (categoryId) => {
-      const categoryIds = await CategoryService.getAllChildCategoryIds(categoryId);
-      return await Product.count({
-        where: { category_id: { [Op.in]: categoryIds } }
-      });
-    },
+    const categoryIds = await CategoryService.getAllChildCategoryIds(
+      categoryId
+    );
+    return await Product.count({
+      where: { category_id: { [Op.in]: categoryIds } },
+    });
+  },
 
   countByPriceRange: async (min, max) => {
-      return await Product.count({
-          where: { price: { [Op.between]: [min, max] } }
-      });
+    return await Product.count({
+      where: { price: { [Op.between]: [min, max] } },
+    });
   },
 
   getCategoryTreeWithCounts: async () => {
@@ -178,11 +186,11 @@ const productService = {
     const buildTree = (items) => {
       const map = {};
       const roots = [];
-      items.forEach(item => {
+      items.forEach((item) => {
         map[item.id] = { ...item, children: [] };
       });
 
-      items.forEach(item => {
+      items.forEach((item) => {
         if (item.parent_id) {
           map[item.parent_id].children.push(map[item.id]);
         } else {
@@ -195,10 +203,13 @@ const productService = {
     const tree = buildTree(results);
 
     function accumulateCounts(nodes) {
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         if (node.children.length) {
           accumulateCounts(node.children);
-          const childrenSum = node.children.reduce((sum, ch) => sum + ch.count, 0);
+          const childrenSum = node.children.reduce(
+            (sum, ch) => sum + ch.count,
+            0
+          );
           node.count += childrenSum;
         }
       });
@@ -206,7 +217,7 @@ const productService = {
 
     accumulateCounts(tree);
     return tree;
-  }
+  },
 };
 
 module.exports = productService;

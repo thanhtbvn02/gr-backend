@@ -25,6 +25,12 @@ const envConfig = {
     emailPassword: process.env.EMAIL_APP_PASSWORD,
     captchaSecretKey: process.env.CAPTCHA_SECRET_KEY,
     frontendUrl: process.env.FRONTEND_URL,
+    vnpayTmnCode: process.env.VNPAY_TMN_CODE,
+    vnpayHashSecret: process.env.VNPAY_HASH_SECRET,
+    vnpayUrl: process.env.VNP_URL,
+    vnpayReturnUrl: process.env.VNP_RETURN_URL,
+    frontendUrl: process.env.FRONTEND_URL,
+
 }
 
 module.exports = envConfig;
