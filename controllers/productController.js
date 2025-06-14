@@ -3,6 +3,8 @@
 const { Op } = require("sequelize");
 const Product = require("../models/productModel");
 const productService = require("../services/productService");
+const { uploadImage } = require("../utils/cloudinary");
+const ImageService = require("../services/imageService");
 
 const productController = {
   getAll: async (req, res) => {
@@ -237,6 +239,45 @@ const productController = {
       res.json({ count });
     } catch (err) {
       res.status(500).json({ message: "Lỗi server", error: err });
+    }
+  },
+
+  createWithImage: async (req, res) => {
+    try {
+      const productData = {
+        name: req.body.name,
+        unit: req.body.unit,
+        price: req.body.price,
+        description: req.body.description || "",
+        uses: req.body.uses || "",
+        how_use: req.body.how_use || "",
+        side_effects: req.body.side_effects || "",
+        notes: req.body.notes || "",
+        preserve: req.body.preserve || "",
+        stock: req.body.stock || 0,
+        category_id: req.body.category_id,
+      };
+      const newProduct = await Product.create(productData);
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          const fileBuffer = file.buffer;
+          const fileBase64 = `data:${
+            file.mimetype
+          };base64,${fileBuffer.toString("base64")}`;
+          const uploadResult = await uploadImage(fileBase64);
+          await ImageService.create(newProduct.id, uploadResult.url);
+        }
+      }
+      res.status(201).json({
+        message: "Tạo sản phẩm thành công",
+        product: newProduct,
+      });
+    } catch (err) {
+      console.error("Error creating product with image:", err);
+      res.status(500).json({
+        message: "Lỗi server khi tạo sản phẩm",
+        error: err.message,
+      });
     }
   },
 };

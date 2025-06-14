@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
+const userService = require("../services/userService");
 
 const { uploadImage, deleteImage } = require("../utils/cloudinary");
 const bufferToDataURI = (file) => {
@@ -109,9 +110,26 @@ const userController = {
     }
   },
 
+  findByNameOrEmail: async (req, res) => {
+    const { keyword } = req.query;
+    try {
+      let user = null;
+      if (keyword) {
+        user = await userService.findByName(keyword);
+        if (!user) user = await userService.findByEmail(keyword);
+      }
+      return res.json(user ? [user] : []);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Lỗi server", error: error.message });
+    }
+  },
+
   updateById: async (req, res) => {
     const { id } = req.params;
-    const { username, email, full_name, phone, birth_date } = req.body;
+    const { username, email, full_name, phone, birth_date, role, status } =
+      req.body;
 
     if (!username) {
       return res.status(400).json({ message: "Username là bắt buộc" });
@@ -119,7 +137,7 @@ const userController = {
 
     try {
       const [updated] = await User.update(
-        { username, email, full_name, phone, birth_date },
+        { username, email, full_name, phone, birth_date, role, status },
         { where: { id } }
       );
 
@@ -303,6 +321,29 @@ const userController = {
         .json({ message: "Lỗi khi upload ảnh", error: err.message });
     }
   },
+  deleteById: async (req, res) => {
+    const { id } = req.params;
+    try {
+      await User.destroy({ where: { id } });
+      return res.status(200).json({ message: "Xóa tài khoản thành công" });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: "Lỗi khi xóa tài khoản", error: err.message });
+    }
+  },
+  deleteMultiple: async (req, res) => {
+    const { ids } = req.body; // [1,2,3,...]
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "Thiếu danh sách id" });
+    }
+    try {
+      const deleted = await User.destroy({ where: { id: ids } });
+      return res.status(200).json({ message: `Đã xóa ${deleted} tài khoản.` });
+    } catch (err) {
+      return res.status(500).json({ message: "Lỗi khi xóa nhiều tài khoản", error: err.message });
+    }
+  },  
 };
 
 module.exports = userController;

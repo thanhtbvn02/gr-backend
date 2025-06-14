@@ -97,6 +97,8 @@ router.post("/logout", userController.logout);
 // GET /api/users/
 router.get("/", userController.getAll);
 
+router.get("/find-by-name-or-email", userController.findByNameOrEmail);
+
 router.get("/count", userController.countAll);
 
 router.get("/count/:role", userController.countByRole);
@@ -116,10 +118,10 @@ router.post("/forgot-password", userController.forgotPassword);
 // POST /api/users/reset-password
 router.post("/reset-password", userController.resetPassword);
 
-router.post(
-    "/:id/avatar",
-    upload.single("image"),
-    userController.uploadAvatar
-  );
+router.post("/:id/avatar", upload.single("image"), userController.uploadAvatar);
+
+router.delete("/:id", userController.deleteById);
+
+router.post("/delete-multiple", userController.deleteMultiple);
 
 module.exports = router;

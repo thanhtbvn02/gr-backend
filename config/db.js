@@ -1,5 +1,5 @@
-const { Sequelize } = require('sequelize');
-const envConfig = require('../config/envconfig');
+const { Sequelize } = require("sequelize");
+const envConfig = require("../config/envconfig");
 
 const sequelize = new Sequelize(
   envConfig.dbName,
@@ -8,29 +8,28 @@ const sequelize = new Sequelize(
   {
     host: envConfig.dbHost,
     port: envConfig.dbPort,
-    dialect: 'mysql',
+    dialect: "mysql",
 
-    charset: 'utf8mb4',
+    charset: "utf8mb4",
     pool: {
       max: 10,
       min: 0,
       acquire: 30000,
-      idle: 10000
+      idle: 10000,
     },
-    logging: false
+    logging: false,
   }
 );
 
 // Test connection
-sequelize.authenticate()
+sequelize
+  .authenticate()
   .then(() => {
-    console.log('MySQL Connected via Sequelize...');
+    console.log("MySQL Connected via Sequelize...");
   })
-  .catch(err => {
-    console.error('MySQL not Connected...');
+  .catch((err) => {
+    console.error("MySQL not Connected...");
     console.error(err);
   });
 
 module.exports = sequelize;
-
-
