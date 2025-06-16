@@ -75,7 +75,6 @@ const categoryController = {
       return res.status(500).json({ error: err.message });
     }
   },
-  // Thêm vào categoryController.js
   getTreeWithCounts: async (req, res) => {
     try {
       const tree = await ProductService.getCategoryTreeWithCounts();
