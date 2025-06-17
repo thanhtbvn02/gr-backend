@@ -81,8 +81,6 @@ const vnpayController = {
       .digest("hex");
 
     if (secureHash === signed && vnp_Params.vnp_ResponseCode === "00") {
-      // Cập nhật trạng thái đơn hàng trong DB
-      // TODO: Thêm code cập nhật đơn hàng với mã vnp_TxnRef
       const orderId = vnp_Params.vnp_TxnRef;
       const transactionId = vnp_Params.vnp_TransactionNo;
       console.log(
@@ -91,7 +89,6 @@ const vnpayController = {
 
       return res.status(200).json({ RspCode: "00", Message: "Success" });
     }
-    // Checksum không hợp lệ hoặc thanh toán thất bại
     return res.status(200).json({ RspCode: "97", Message: "Invalid Checksum" });
   },
 
@@ -110,7 +107,6 @@ const vnpayController = {
 
     if (secureHash === signed) {
       if (vnp_Params.vnp_ResponseCode === "00") {
-        // Chuyển tất cả các tham số từ VNPay vào URL redirect
         const vnpData = qs.stringify(vnp_Params);
         return res.redirect(
           `${envConfig.frontendUrl}/vnpay-return?status=success&${vnpData}`

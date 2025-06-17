@@ -21,7 +21,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Test connection
 sequelize
   .authenticate()
   .then(() => {

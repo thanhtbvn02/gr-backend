@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
+  const token = authHeader && authHeader.split(" ")[1]; 
 
   if (!token) return res.status(401).json({ error: "Không có token xác thực" });
 
@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
           .status(403)
           .json({ error: "Token không hợp lệ hoặc đã hết hạn" });
 
-      req.user = decoded; // Gắn thông tin user vào req
+      req.user = decoded; 
       next();
     }
   );
@@ -33,12 +33,10 @@ const optionalAuth = (req, res, next) => {
         if (!err) {
           req.user = decoded;
         }
-        // Call next() after verification attempt, regardless of outcome for optional auth
         next();
       }
     );
   } else {
-    // No token, proceed to next middleware/handler
     next();
   }
 };

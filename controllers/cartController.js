@@ -4,7 +4,6 @@ const cartService = require('../services/cartService');
 const cartController = {
     getById: async (req, res) => {
         try {
-            // Nếu không có user (chưa đăng nhập), trả về mảng rỗng
             if (!req.user) {
                 return res.json([]);
             }

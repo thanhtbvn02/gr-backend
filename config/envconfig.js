@@ -2,12 +2,10 @@ const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config();
 
-// chọn chế độ môi trường từ biến môi trường NODE_ENV
 const envMode = process.env.NODE_ENV
 let envFileName = '.env'
 if (envMode) envFileName += `.${envMode}`
 
-// Nạp biến môi trường từ file .env tương ứng
 dotenv.config({ path: path.resolve(process.cwd(), envFileName), override: true })
 
 const envConfig = {

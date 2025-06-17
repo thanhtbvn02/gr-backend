@@ -149,13 +149,11 @@ const checkGoogleUser = async (data) => {
   }
 };
 
-// Route mở popup Google
 router.get("/google", (req, res) => {
   const url = getGoogleAuthUrl();
   res.redirect(url);
 });
 
-// Callback từ Google
 router.get("/google/callback", async (req, res) => {
   try {
     const { code, error, error_description } = req.query;

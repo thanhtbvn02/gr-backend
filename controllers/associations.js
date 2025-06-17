@@ -10,7 +10,6 @@ const Order = require('../models/orderModel');
 const OrderItem = require('../models/orderItemModel');
 const Cart = require('../models/cartModel');
 
-// Thiết lập mối quan hệ
 Product.belongsTo(Category, { foreignKey: 'category_id', as: 'Category' });
 Category.hasMany(Product, { foreignKey: 'category_id' });
 

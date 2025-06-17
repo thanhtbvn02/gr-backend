@@ -1,5 +1,4 @@
-// Op (Operators) là một đối tượng từ Sequelize cung cấp các toán tử để thực hiện các truy vấn phức tạp
-// Ví dụ: Op.like để tìm kiếm theo mẫu, Op.gt để so sánh lớn hơn, Op.lt để so sánh nhỏ hơn,...
+
 const { Op } = require("sequelize");
 const Product = require("../models/productModel");
 const productService = require("../services/productService");
@@ -155,7 +154,6 @@ const productController = {
         queryOptions.offset = (parseInt(page) - 1) * parseInt(limit);
       }
 
-      // Sử dụng includeFirstImage từ query param
       const includeFirstImage =
         include_image === "true" || include_image === true;
 
@@ -168,15 +166,12 @@ const productController = {
       let productsWithImages = products.rows;
 
       if (includeFirstImage) {
-        // Lấy tất cả product_id
         const productIds = productsWithImages.map((product) => product.id);
 
-        // Lấy hình ảnh đầu tiên cho mỗi sản phẩm trong một lần gọi
         const images = await productService.getFirstImagesForProducts(
           productIds
         );
 
-        // Map hình ảnh vào sản phẩm
         productsWithImages = productsWithImages.map((product) => {
           const productImage = images.find(
             (img) => img.product_id === product.id

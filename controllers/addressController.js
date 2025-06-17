@@ -26,7 +26,7 @@ const addressController = {
         district,
         ward,
         street,
-        is_default: is_default === true  // cho phép gửi tùy chọn
+        is_default: is_default === true  
       };
 
       const address = await addressesService.create(addressData);

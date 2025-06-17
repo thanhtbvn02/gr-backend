@@ -6,7 +6,6 @@ function validate(schema) {
     if (!result.success) {
       const constraints = {};
       for (const issue of result.error.errors) {
-        // lấy tên field (nếu nested, join bằng '.')
         const key = issue.path.join('.') || '_';
         if (!(key in constraints)) {
           constraints[key] = issue.message;
@@ -19,7 +18,6 @@ function validate(schema) {
       });
     }
 
-    // Ghi đè body đã được parse & transform
     req.body = result.data;
     next();
   };
