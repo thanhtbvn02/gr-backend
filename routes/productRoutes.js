@@ -20,6 +20,11 @@ router.post(
   productController.createWithImage
 );
 router.put("/:id", productController.update);
+router.put(
+  "/update-with-images/:id",
+  upload.array("images", 4),
+  productController.updateWithImages
+);
 router.delete("/:id", productController.delete);
 
 module.exports = router;

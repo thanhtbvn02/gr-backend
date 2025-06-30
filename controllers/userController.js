@@ -77,6 +77,7 @@ const userController = {
           email: user.email,
           full_name: user.full_name,
           role: user.role,
+          status: user.status,
         },
       });
     } catch (err) {
@@ -341,9 +342,11 @@ const userController = {
       const deleted = await User.destroy({ where: { id: ids } });
       return res.status(200).json({ message: `Đã xóa ${deleted} tài khoản.` });
     } catch (err) {
-      return res.status(500).json({ message: "Lỗi khi xóa nhiều tài khoản", error: err.message });
+      return res
+        .status(500)
+        .json({ message: "Lỗi khi xóa nhiều tài khoản", error: err.message });
     }
-  },  
+  },
 };
 
 module.exports = userController;

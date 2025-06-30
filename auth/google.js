@@ -139,7 +139,7 @@ const checkGoogleUser = async (data) => {
     const userAfter = await userService.findByEmail(data.email);
 
     const token = jwt.sign(
-      { userId: userAfter.id, role: userAfter.role },
+      { userId: userAfter.id, role: userAfter.role, status: userAfter.status },
       process.env.JWT_SECRET || "USER_SECRET_KEY",
       { expiresIn: "1d" }
     );

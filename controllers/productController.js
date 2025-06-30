@@ -1,4 +1,3 @@
-
 const { Op } = require("sequelize");
 const Product = require("../models/productModel");
 const productService = require("../services/productService");
@@ -271,6 +270,87 @@ const productController = {
       console.error("Error creating product with image:", err);
       res.status(500).json({
         message: "Lỗi server khi tạo sản phẩm",
+        error: err.message,
+      });
+    }
+  },
+  updateWithImages: async (req, res) => {
+    const { id } = req.params;
+    const {
+      name,
+      unit,
+      price,
+      description,
+      uses,
+      how_use,
+      side_effects,
+      notes,
+      preserve,
+      stock,
+      category_id,
+    } = req.body;
+
+    let images = req.body.images;
+    if (typeof images === "string") images = [images];
+    if (!images) images = [];
+
+    try {
+      let uploadedUrls = [];
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          const fileBuffer = file.buffer;
+          const fileBase64 = `data:${
+            file.mimetype
+          };base64,${fileBuffer.toString("base64")}`;
+          const uploadResult = await uploadImage(fileBase64);
+          uploadedUrls.push(uploadResult.url);
+        }
+      }
+
+      const finalImageUrls = [...images.filter(Boolean), ...uploadedUrls];
+
+      const [updated] = await Product.update(
+        {
+          name,
+          unit,
+          price,
+          description,
+          uses,
+          how_use,
+          side_effects,
+          notes,
+          preserve,
+          stock,
+          category_id,
+        },
+        { where: { id } }
+      );
+      if (!updated) {
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+      }
+
+      const oldImages = await ImageService.getByProductId(id);
+      const oldUrls = oldImages.map((img) => img.url);
+
+      for (const img of oldImages) {
+        if (!finalImageUrls.includes(img.url)) {
+          await ImageService.remove(img.id);
+        }
+      }
+      for (const url of finalImageUrls) {
+        if (url && !oldUrls.includes(url)) {
+          await ImageService.create(id, url);
+        }
+      }
+
+      res.json({
+        message: "Cập nhật sản phẩm và ảnh thành công!",
+        images: finalImageUrls,
+      });
+    } catch (err) {
+      console.error("Error updating product with images:", err);
+      res.status(500).json({
+        message: "Lỗi server khi cập nhật sản phẩm",
         error: err.message,
       });
     }
