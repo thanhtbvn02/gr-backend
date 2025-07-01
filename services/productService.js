@@ -85,6 +85,30 @@ const productService = {
     });
   },
 
+  searchPaginated: async (name = "", offset = 0, limit = 10) => {
+    const result = await Product.findAndCountAll({
+      where: {
+        name: { [Op.like]: `%${name}%` },
+      },
+      order: [["id", "ASC"]],
+      limit,
+      offset,
+    });
+    return result;
+  },
+
+  getByCategoryPaginated: async (categoryId, offset = 0, limit = 10) => {
+    const result = await Product.findAndCountAll({
+      where: {
+        category_id: categoryId,
+      },
+      order: [["id", "ASC"]],
+      limit,
+      offset,
+    });
+    return result;
+  },
+
   getPaginated: async (offset = 0, limit = 10, includeFirstImage = false) => {
     const options = {
       order: [["id", "ASC"]],
@@ -108,7 +132,6 @@ const productService = {
   },
 
   getFirstImagesForProducts: async (productIds) => {
-    // Sử dụng SQL tương thích với MySQL/MariaDB để lấy hình ảnh đầu tiên cho mỗi sản phẩm
     const [results] = await sequelize.query(`
       SELECT i.*
       FROM images i
@@ -217,6 +240,19 @@ const productService = {
 
     accumulateCounts(tree);
     return tree;
+  },
+
+  getAllCategoryChildrenIds: async (categoryId) => {
+    const subCategories = [parseInt(categoryId)];
+    const findChildren = async (catId) => {
+      const children = await Category.findAll({ where: { parent_id: catId } });
+      for (const child of children) {
+        subCategories.push(child.id);
+        await findChildren(child.id);
+      }
+    };
+    await findChildren(categoryId);
+    return subCategories;
   },
 };
 

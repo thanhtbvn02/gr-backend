@@ -199,6 +199,83 @@ const productController = {
     }
   },
 
+  searchPaginated: async (req, res) => {
+    const { query = "", page, limit = 12, offset } = req.query;
+    let actualOffset;
+
+    if (offset !== undefined) {
+      actualOffset = parseInt(offset);
+    } else if (page !== undefined) {
+      actualOffset = (parseInt(page) - 1) * parseInt(limit);
+    } else {
+      actualOffset = 0;
+    }
+
+    try {
+      const result = await productService.searchPaginated(
+        query,
+        actualOffset,
+        parseInt(limit)
+      );
+
+      const response = {
+        total: result.count,
+        products: result.rows,
+      };
+
+      if (page !== undefined) {
+        response.pages = Math.ceil(result.count / parseInt(limit));
+        response.currentPage = parseInt(page);
+      }
+
+      res.json(response);
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi server", error: err });
+    }
+  },
+
+  getByCategoryPaginated: async (req, res) => {
+    const { id } = req.params;
+    const { page, limit = 12, offset } = req.query;
+    let actualOffset;
+
+    if (offset !== undefined) {
+      actualOffset = parseInt(offset);
+    } else if (page !== undefined) {
+      actualOffset = (parseInt(page) - 1) * parseInt(limit);
+    } else {
+      actualOffset = 0;
+    }
+
+    try {
+      const categoryIds = await productService.getAllCategoryChildrenIds(id);
+      const result = await Product.findAndCountAll({
+        where: {
+          category_id: {
+            [Op.in]: categoryIds,
+          },
+        },
+        order: [["id", "ASC"]],
+        limit: parseInt(limit),
+        offset: actualOffset,
+      });
+
+      const response = {
+        total: result.count,
+        products: result.rows,
+      };
+
+      if (page !== undefined) {
+        response.pages = Math.ceil(result.count / parseInt(limit));
+        response.currentPage = parseInt(page);
+      }
+
+      res.json(response);
+    } catch (err) {
+      res.status(500).json({ message: "Lỗi server", error: err });
+    }
+  },
+
   countAll: async (req, res) => {
     try {
       const count = await productService.count();

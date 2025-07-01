@@ -5,7 +5,8 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
 
 router.get("/", productController.getAll);
-router.get("/search", productController.search);
+router.get("/search/paginated", productController.searchPaginated);
+router.get("/category/:id/paginated", productController.getByCategoryPaginated);
 router.get("/category/:id", productController.getByCategory);
 router.get("/paginated", productController.getPaginated);
 router.get("/count", productController.countAll);
